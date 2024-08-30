@@ -1,12 +1,20 @@
+import { validateRequest } from "@/auth";
 import Image from "next/image";
+import { redirect } from "next/navigation";
+import { BackButton } from "./_components";
 
 type AuthLayoutProps = {
   children: React.ReactNode;
 };
 
-const AuthLayout = ({ children }: AuthLayoutProps) => {
+const AuthLayout = async ({ children }: AuthLayoutProps) => {
+  const { session } = await validateRequest();
+
+  if (session) redirect("/");
+
   return (
-    <main className="flex h-dvh flex-col items-center justify-center gap-y-5 bg-secondary px-3 md:px-6">
+    <main className="relative flex h-dvh flex-col items-center justify-center gap-y-5 bg-secondary px-3 md:px-6">
+      <BackButton />
       <div className="flex items-center gap-x-2">
         <Image
           src="/icon.svg"

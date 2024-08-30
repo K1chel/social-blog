@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
 
+import { signUp } from "@/actions/auth/sign-up";
+import { FormError } from "@/components/form-error";
+import { SubmitButton } from "@/components/submit-button";
 import {
   Form,
   FormControl,
@@ -14,11 +17,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { registerSchema, RegisterValues } from "@/lib/validations";
-import { ShowPassword } from "./show-password";
-import { Button } from "@/components/ui/button";
+import { ShowPassword } from "@/app/auth/_components";
 
 export const SignUpForm = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [error, setError] = useState<string>();
+
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
@@ -30,7 +35,11 @@ export const SignUpForm = () => {
   });
 
   const onSubmit = async (values: RegisterValues) => {
-    console.log({ values });
+    setError(undefined);
+    startTransition(async () => {
+      const { error } = await signUp(values);
+      if (error) setError(error);
+    });
   };
 
   const togglePasswordVisibility = () => {
@@ -40,6 +49,7 @@ export const SignUpForm = () => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+        {error && <FormError error={error} />}
         <FormField
           control={form.control}
           name="username"
@@ -47,7 +57,7 @@ export const SignUpForm = () => {
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="john_doe" />
+                <Input {...field} placeholder="john_doe" disabled={isPending} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -64,6 +74,7 @@ export const SignUpForm = () => {
                   type="email"
                   {...field}
                   placeholder="example@email.com"
+                  disabled={isPending}
                 />
               </FormControl>
               <FormMessage />
@@ -83,10 +94,12 @@ export const SignUpForm = () => {
                     type={showPassword ? "text" : "password"}
                     placeholder="********"
                     className="pr-10"
+                    disabled={isPending}
                   />
                   <ShowPassword
                     showPassword={showPassword}
                     togglePasswordVisibility={togglePasswordVisibility}
+                    disabled={isPending}
                   />
                 </div>
               </FormControl>
@@ -94,9 +107,11 @@ export const SignUpForm = () => {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
-          Create
-        </Button>
+        <SubmitButton
+          text="Create Account"
+          loadingText="Creating account..."
+          loading={isPending}
+        />
       </form>
     </Form>
   );
