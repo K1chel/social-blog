@@ -1,0 +1,25 @@
+import Image from "next/image";
+
+type AuthLayoutProps = {
+  children: React.ReactNode;
+};
+
+const AuthLayout = ({ children }: AuthLayoutProps) => {
+  return (
+    <main className="flex h-dvh flex-col items-center justify-center gap-y-5 bg-secondary px-3 md:px-6">
+      <div className="flex items-center gap-x-2">
+        <Image
+          src="/icon.svg"
+          alt="Next.js logo"
+          width={50}
+          height={50}
+          className="size-10 md:size-14"
+        />
+        <h1 className="text-lg font-semibold md:text-2xl">Social blog</h1>
+      </div>
+      {children}
+    </main>
+  );
+};
+
+export default AuthLayout;
